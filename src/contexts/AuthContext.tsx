@@ -1,19 +1,14 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react    <AuthContext.Provider value={{
-      user,
-      isLoading,
-      login,
-      logout,
-      hasRole,
-      hasAnyRole,
-    }}>port { useRouter } from 'next/navigation';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface User {
   id: number;
   username: string;
   name: string;
   roles: string[];
+  currentRole: string; // Role ที่เลือกในขณะนี้
 }
 
 interface AuthContextType {
@@ -23,6 +18,7 @@ interface AuthContextType {
   logout: () => void;
   hasRole: (role: string) => boolean;
   hasAnyRole: (roles: string[]) => boolean;
+  switchRole: (role: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -55,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
       // เรียก Backend API สำหรับ login
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7801';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7800';
       const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
@@ -67,11 +63,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         const data = await response.json();
         
+        // ใช้ role แรกใน roles เป็น default
+        const currentRole = data.user.roles[0];
+
         const userData = {
           id: data.user.id,
           username: data.user.username,
           name: data.user.name,
-          roles: data.user.roles
+          roles: data.user.roles,
+          currentRole
         };
 
         localStorage.setItem('isLoggedIn', 'true');
@@ -107,6 +107,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return user?.roles?.some(userRole => roles.includes(userRole)) || false;
   };
 
+  const switchRole = (role: string) => {
+    if (user && user.roles.includes(role)) {
+      const updatedUser = { ...user, currentRole: role };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -115,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       hasRole,
       hasAnyRole,
+      switchRole,
     }}>
       {children}
     </AuthContext.Provider>

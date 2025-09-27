@@ -16,7 +16,7 @@ interface RoleBadgeProps {
 
 const roleConfig = {
   admin: {
-    label: 'ผู้ดูแลระบบ',
+    label: 'แอดมิน',
     color: 'error' as const,
     icon: <AdminPanelSettings fontSize="small" />
   },
