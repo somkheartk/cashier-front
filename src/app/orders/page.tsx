@@ -3,54 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
-  Typography,
   Button,
   TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Snackbar,
-  IconButton,
-  Tooltip,
-  Grid,
-  Divider,
-  AppBar,
-  Toolbar,
-  Avatar,
-  CircularProgress,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction
+  Typography
 } from '@mui/material';
 import {
-  Visibility as ViewIcon,
-  Print as PrintIcon,
-  Refresh as RefreshIcon,
-  Search as SearchIcon,
-  Receipt as ReceiptIcon,
-  FilterList as FilterIcon,
   Add as AddIcon,
-  Edit as EditIcon
+  Search as SearchIcon
 } from '@mui/icons-material';
-import { format } from 'date-fns';
-import { apiService } from '@/services/api';
+import { OrderStatusCards, OrdersTable, OrderDetailsDialog, NewOrderDialog } from '@/components/orders';
 
 interface OrderItem {
   id: number;
@@ -180,56 +145,7 @@ export default function OrdersPage() {
       </Box>
 
       {/* Status Cards */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 3 }}>
-        <Box>
-          <Card elevation={2} sx={{ bgcolor: 'warning.light', color: 'warning.contrastText' }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" fontWeight="bold">
-                {statusCounts.pending}
-              </Typography>
-              <Typography variant="body1">
-                รอดำเนินการ
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
-        <Box>
-          <Card elevation={2} sx={{ bgcolor: 'info.light', color: 'info.contrastText' }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" fontWeight="bold">
-                {statusCounts.preparing}
-              </Typography>
-              <Typography variant="body1">
-                กำลังเตรียม
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
-        <Box>
-          <Card elevation={2} sx={{ bgcolor: 'success.light', color: 'success.contrastText' }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" fontWeight="bold">
-                {statusCounts.ready}
-              </Typography>
-              <Typography variant="body1">
-                พร้อมเสิร์ฟ
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
-        <Box>
-          <Card elevation={2} sx={{ bgcolor: 'grey.400', color: 'grey.contrastText' }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" fontWeight="bold">
-                {statusCounts.completed}
-              </Typography>
-              <Typography variant="body1">
-                สำเร็จ
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
-      </Box>
+      <OrderStatusCards statusCounts={statusCounts} />
 
       {/* Filters */}
       <Box mb={3} display="flex" gap={2} alignItems="center">
@@ -258,214 +174,28 @@ export default function OrdersPage() {
       </Box>
 
       {/* Orders Table */}
-      <TableContainer component={Paper} elevation={2}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell><strong>รหัสออเดอร์</strong></TableCell>
-              <TableCell><strong>ลูกค้า</strong></TableCell>
-              <TableCell><strong>โต๊ะ</strong></TableCell>
-              <TableCell><strong>จำนวนรายการ</strong></TableCell>
-              <TableCell align="right"><strong>ยอดรวม</strong></TableCell>
-              <TableCell><strong>สถานะ</strong></TableCell>
-              <TableCell><strong>เวลา</strong></TableCell>
-              <TableCell align="center"><strong>การดำเนินการ</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredOrders.map((order) => (
-              <TableRow key={order.id} hover>
-                <TableCell>
-                  <Typography fontWeight="medium">#{order.id}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Box>
-                    <Typography variant="body1">{order.customerName}</Typography>
-                    {order.customerPhone !== '-' && (
-                      <Typography variant="body2" color="textSecondary">
-                        {order.customerPhone}
-                      </Typography>
-                    )}
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  {order.tableNumber && (
-                    <Chip label={order.tableNumber} size="small" variant="outlined" />
-                  )}
-                </TableCell>
-                <TableCell>{order.items.length} รายการ</TableCell>
-                <TableCell align="right">
-                  <Typography fontWeight="bold">฿{order.total.toLocaleString()}</Typography>
-                </TableCell>
-                <TableCell>
-                  <Chip 
-                    label={getStatusText(order.status)} 
-                    color={getStatusColor(order.status)}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>
-                  {format(order.createdAt, 'HH:mm:ss')}
-                </TableCell>
-                <TableCell align="center">
-                  <Box display="flex" gap={1} justifyContent="center">
-                    <IconButton 
-                      size="small" 
-                      color="primary"
-                      onClick={() => handleViewOrder(order)}
-                    >
-                      <ViewIcon />
-                    </IconButton>
-                    <IconButton size="small" color="secondary">
-                      <PrintIcon />
-                    </IconButton>
-                    {order.status !== 'completed' && order.status !== 'cancelled' && (
-                      <IconButton size="small" color="info">
-                        <EditIcon />
-                      </IconButton>
-                    )}
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <OrdersTable
+        orders={filteredOrders}
+        onViewOrder={handleViewOrder}
+        getStatusColor={getStatusColor}
+        getStatusText={getStatusText}
+      />
 
       {/* View Order Dialog */}
-      <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          รายละเอียดออเดอร์ #{selectedOrder?.id}
-        </DialogTitle>
-        <DialogContent>
-          {selectedOrder && (
-            <Box>
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 3 }}>
-                <Box>
-                  <Typography variant="body2" color="textSecondary">ลูกค้า</Typography>
-                  <Typography variant="body1" fontWeight="medium">{selectedOrder.customerName}</Typography>
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="textSecondary">เบอร์โทร</Typography>
-                  <Typography variant="body1">{selectedOrder.customerPhone}</Typography>
-                </Box>
-                {selectedOrder.tableNumber && (
-                  <Box>
-                    <Typography variant="body2" color="textSecondary">โต๊ะ</Typography>
-                    <Typography variant="body1">{selectedOrder.tableNumber}</Typography>
-                  </Box>
-                )}
-                <Box>
-                  <Typography variant="body2" color="textSecondary">สถานะ</Typography>
-                  <Chip 
-                    label={getStatusText(selectedOrder.status)} 
-                    color={getStatusColor(selectedOrder.status)}
-                    size="small"
-                  />
-                </Box>
-              </Box>
-
-              <Divider sx={{ mb: 2 }} />
-
-              <Typography variant="h6" gutterBottom>รายการสินค้า</Typography>
-              <List dense>
-                {selectedOrder.items.map((item, index) => (
-                  <ListItem key={index}>
-                    <ListItemText
-                      primary={item.name}
-                      secondary={`฿${item.price} × ${item.quantity}`}
-                    />
-                    <ListItemSecondaryAction>
-                      <Typography fontWeight="bold">
-                        ฿{(item.price * item.quantity).toLocaleString()}
-                      </Typography>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                ))}
-              </List>
-
-              <Divider sx={{ my: 2 }} />
-
-              <Box display="flex" justifyContent="space-between" alignItems="center">
-                <Typography variant="h6">ยอดรวม</Typography>
-                <Typography variant="h6" color="primary" fontWeight="bold">
-                  ฿{selectedOrder.total.toLocaleString()}
-                </Typography>
-              </Box>
-
-              {selectedOrder.status !== 'completed' && selectedOrder.status !== 'cancelled' && (
-                <Box mt={3}>
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
-                    อัพเดทสถานะ
-                  </Typography>
-                  <Box display="flex" gap={1} flexWrap="wrap">
-                    {selectedOrder.status === 'pending' && (
-                      <Button 
-                        variant="outlined" 
-                        color="info"
-                        size="small"
-                        onClick={() => handleUpdateOrderStatus(selectedOrder.id, 'preparing')}
-                      >
-                        เริ่มเตรียม
-                      </Button>
-                    )}
-                    {selectedOrder.status === 'preparing' && (
-                      <Button 
-                        variant="outlined" 
-                        color="success"
-                        size="small"
-                        onClick={() => handleUpdateOrderStatus(selectedOrder.id, 'ready')}
-                      >
-                        พร้อมเสิร์ฟ
-                      </Button>
-                    )}
-                    {selectedOrder.status === 'ready' && (
-                      <Button 
-                        variant="outlined" 
-                        color="primary"
-                        size="small"
-                        onClick={() => handleUpdateOrderStatus(selectedOrder.id, 'completed')}
-                      >
-                        เสร็จสิ้น
-                      </Button>
-                    )}
-                    <Button 
-                      variant="outlined" 
-                      color="error"
-                      size="small"
-                      onClick={() => handleUpdateOrderStatus(selectedOrder.id, 'cancelled')}
-                    >
-                      ยกเลิก
-                    </Button>
-                  </Box>
-                </Box>
-              )}
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setViewDialogOpen(false)}>ปิด</Button>
-          <Button variant="contained" startIcon={<PrintIcon />}>
-            พิมพ์
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <OrderDetailsDialog
+        open={viewDialogOpen}
+        onClose={() => setViewDialogOpen(false)}
+        order={selectedOrder}
+        onUpdateStatus={handleUpdateOrderStatus}
+        getStatusColor={getStatusColor}
+        getStatusText={getStatusText}
+      />
 
       {/* New Order Dialog */}
-      <Dialog open={newOrderDialogOpen} onClose={() => setNewOrderDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>สร้างออเดอร์ใหม่</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2 }}>
-            <Typography variant="body1" color="textSecondary">
-              ฟีเจอร์นี้จะพัฒนาในเวอร์ชันถัดไป...
-            </Typography>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setNewOrderDialogOpen(false)}>ยกเลิก</Button>
-          <Button variant="contained">สร้างออเดอร์</Button>
-        </DialogActions>
-      </Dialog>
+      <NewOrderDialog
+        open={newOrderDialogOpen}
+        onClose={() => setNewOrderDialogOpen(false)}
+      />
     </Box>
   );
 }

@@ -20,6 +20,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { StatsCard, RecentOrders, AlertsList, QuickActions } from '../components/dashboard';
 
 export default function HomePage() {
   const theme = useTheme();
@@ -320,85 +321,9 @@ export default function HomePage() {
           {stats.map((stat, index) => (
             <Box key={index}>
               <Slide direction="up" in={!loading} timeout={500 + index * 100}>
-                <Card elevation={2} sx={{
-                  borderRadius: 3,
-                  background: 'white',
-                  border: '1px solid #e0e0e0',
-                  transition: 'all 0.3s ease',
-                  overflow: 'hidden',
-                  position: 'relative',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
-                  }
-                }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                      <Avatar sx={{
-                        bgcolor: stat.color,
-                        width: 56,
-                        height: 56,
-                        boxShadow: '0 4px 14px rgba(0,0,0,0.15)'
-                      }}>
-                        {stat.icon}
-                      </Avatar>
-
-                      <Box sx={{ textAlign: 'right' }}>
-                        {stat.trend === 'up' ? (
-                          <TrendingUp sx={{ color: '#4CAF50', fontSize: 20 }} />
-                        ) : (
-                          <TrendingDown sx={{ color: '#f44336', fontSize: 20 }} />
-                        )}
-                        <Chip
-                          label={stat.change}
-                          size="small"
-                          sx={{
-                            ml: 1,
-                            bgcolor: stat.change.includes('+') ? '#E8F5E8' : '#FFEBEE',
-                            color: stat.change.includes('+') ? '#2E7D32' : '#C62828',
-                            fontWeight: 'bold'
-                          }}
-                        />
-                      </Box>
-                    </Box>
-
-                    <Typography variant="h4" sx={{
-                      fontWeight: 'bold',
-                      color: '#333',
-                      mb: 1
-                    }}>
-                      {stat.value}
-                    </Typography>
-
-                    <Typography variant="body2" sx={{
-                      color: 'text.secondary',
-                      fontWeight: 'medium',
-                      mb: 2
-                    }}>
-                      {stat.label}
-                    </Typography>
-
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={stat.progress}
-                        sx={{
-                          flex: 1,
-                          height: 8,
-                          borderRadius: 4,
-                          bgcolor: 'rgba(0,0,0,0.1)',
-                          '& .MuiLinearProgress-bar': {
-                            bgcolor: stat.color,
-                            borderRadius: 4
-                          }
-                        }}
-                      />
-                      <Typography variant="caption" sx={{ color: 'text.secondary', minWidth: 35 }}>
-                        {stat.progress.toFixed(0)}%
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
+                <div>
+                  <StatsCard stat={stat} index={index} loading={loading} />
+                </div>
               </Slide>
             </Box>
           ))}
@@ -416,117 +341,9 @@ export default function HomePage() {
           {/* Quick Actions */}
           <Box>
             <Fade in={!loading} timeout={1500}>
-              <Paper elevation={2} sx={{
-                p: 4,
-                borderRadius: 3,
-                background: 'white',
-                border: '1px solid #e0e0e0'
-              }}>
-                <Typography variant="h5" sx={{
-                  fontWeight: 'bold',
-                  mb: 3,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  color: '#2E7D32'
-                }}>
-                  <Speed sx={{ color: '#2E7D32' }} />
-                  เมนูหลัก
-                </Typography>
-
-                <Box sx={{
-                  display: 'grid',
-                  gridTemplateColumns: {
-                    xs: '1fr',
-                    sm: 'repeat(2, 1fr)',
-                    md: 'repeat(3, 1fr)'
-                  },
-                  gap: 2
-                }}>
-                  {quickActions.map((item, index) => (
-                    <Box key={index}>
-                      <Slide direction="up" in={!loading} timeout={1600 + index * 100}>
-                        <Link href={item.href} style={{ textDecoration: 'none' }}>
-                          <Card sx={{
-                            background: item.color,
-                            color: 'white',
-                            borderRadius: 3,
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            height: item.primary ? 160 : 140,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            border: item.primary ? '3px solid #2E7D32' : 'none',
-                            boxShadow: item.primary ? '0 4px 20px rgba(46, 125, 50, 0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
-                            '&:hover': {
-                              transform: 'translateY(-6px) scale(1.02)',
-                              boxShadow: item.primary ? '0 8px 30px rgba(46, 125, 50, 0.4)' : '0 8px 25px rgba(0,0,0,0.15)'
-                            },
-                            '&::before': {
-                              content: '""',
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              background: 'linear-gradient(45deg, transparent, rgba(255,255,255,0.1))',
-                              opacity: 0,
-                              transition: 'opacity 0.3s ease'
-                            },
-                            '&:hover::before': {
-                              opacity: 1
-                            }
-                          }}>
-                            <CardContent sx={{
-                              flex: 1,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              textAlign: 'center',
-                              position: 'relative',
-                              zIndex: 1,
-                              p: 2
-                            }}>
-                              {item.badge && (
-                                <Badge
-                                  badgeContent={item.badge}
-                                  color="error"
-                                  sx={{ position: 'absolute', top: 8, right: 8 }}
-                                >
-                                  <Box />
-                                </Badge>
-                              )}
-
-                              <Box sx={{ mb: 1 }}>
-                                {React.cloneElement(item.icon, { sx: { fontSize: 32 } })}
-                              </Box>
-
-                              <Typography variant="h6" sx={{
-                                fontWeight: 'bold',
-                                mb: 0.5,
-                                textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
-                              }}>
-                                {item.title}
-                              </Typography>
-
-                              <Typography variant="body2" sx={{
-                                opacity: 0.9,
-                                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-                                fontSize: '0.8rem'
-                              }}>
-                                {item.desc}
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Link>
-                      </Slide>
-                    </Box>
-                  ))}
-                </Box>
-              </Paper>
+              <div>
+                <QuickActions actions={quickActions} loading={loading} />
+              </div>
             </Fade>
           </Box>
 
@@ -534,190 +351,54 @@ export default function HomePage() {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Recent Orders */}
             <Fade in={!loading} timeout={1800}>
-              <Paper elevation={2} sx={{
-                p: 3,
-                borderRadius: 3,
-                background: 'white',
-                border: '1px solid #e0e0e0'
-              }}>
-                <Typography variant="h6" sx={{
-                  fontWeight: 'bold',
-                  mb: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  color: '#1976D2'
-                }}>
-                  <Receipt sx={{ color: '#1976D2' }} />
-                  ออเดอร์ล่าสุด
-                </Typography>
-
-                <List sx={{ p: 0 }}>
-                  {recentOrders.map((order, index) => (
-                    <ListItem key={index} sx={{
-                      px: 0,
-                      py: 1.5,
-                      borderBottom: index < recentOrders.length - 1 ? '1px solid rgba(0,0,0,0.08)' : 'none'
-                    }}>
-                      <ListItemAvatar>
-                        <Avatar sx={{
-                          bgcolor: order.status === 'completed' ? '#4CAF50' : '#FF9800',
-                          width: 40,
-                          height: 40
-                        }}>
-                          <Receipt sx={{ fontSize: 20 }} />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                              {order.id}
-                            </Typography>
-                            <Chip
-                              label={order.status === 'completed' ? 'สำเร็จ' : 'รอดำเนินการ'}
-                              size="small"
-                              sx={{
-                                height: 20,
-                                fontSize: '0.7rem',
-                                bgcolor: order.status === 'completed' ? '#E8F5E8' : '#FFF3E0',
-                                color: order.status === 'completed' ? '#2E7D32' : '#E65100'
-                              }}
-                            />
-                          </Box>
-                        }
-                        secondary={
-                          <span>
-                            <Typography variant="body2" color="text.secondary" component="span">
-                              {order.customer}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" component="span" sx={{ display: 'block' }}>
-                              {order.time}
-                            </Typography>
-                          </span>
-                        }
-                      />
-                      <ListItemSecondaryAction>
-                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#4CAF50' }}>
-                          ฿{order.total.toLocaleString()}
-                        </Typography>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  ))}
-                </List>
-
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  sx={{
-                    mt: 2,
-                    borderColor: '#4facfe',
-                    color: '#4facfe',
-                    '&:hover': {
-                      borderColor: '#4facfe',
-                      bgcolor: 'rgba(79, 172, 254, 0.1)'
-                    }
-                  }}
-                  onClick={() => router.push('/orders')}
-                >
-                  ดูออเดอร์ทั้งหมด
-                </Button>
-              </Paper>
+              <div>
+                <RecentOrders orders={recentOrders} loading={loading} />
+              </div>
             </Fade>
 
             {/* Alerts */}
             <Fade in={!loading} timeout={2000}>
-              <Paper elevation={2} sx={{
-                p: 3,
-                borderRadius: 3,
-                background: 'white',
-                border: '1px solid #e0e0e0'
-              }}>
-                <Typography variant="h6" sx={{
-                  fontWeight: 'bold',
-                  mb: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  color: '#ED6C02'
-                }}>
-                  <Notifications sx={{ color: '#ED6C02' }} />
-                  แจ้งเตือน
-                </Typography>
-
-                <List sx={{ p: 0 }}>
-                  {alerts.map((alert, index) => (
-                    <ListItem key={index} sx={{
-                      px: 0,
-                      py: 1.5,
-                      borderBottom: index < alerts.length - 1 ? '1px solid rgba(0,0,0,0.08)' : 'none'
-                    }}>
-                      <ListItemAvatar>
-                        <Avatar sx={{
-                          bgcolor: alert.type === 'warning' ? '#FFF3E0' :
-                                   alert.type === 'success' ? '#E8F5E8' :
-                                   alert.type === 'error' ? '#FFEBEE' : '#E3F2FD',
-                          width: 36,
-                          height: 36
-                        }}>
-                          {alert.type === 'warning' ? <Warning sx={{ color: '#E65100', fontSize: 18 }} /> :
-                           alert.type === 'success' ? <CheckCircle sx={{ color: '#2E7D32', fontSize: 18 }} /> :
-                           alert.type === 'error' ? <Error sx={{ color: '#C62828', fontSize: 18 }} /> :
-                           <Info sx={{ color: '#1565C0', fontSize: 18 }} />}
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Typography variant="body2" sx={{ fontWeight: 'medium', lineHeight: 1.3 }}>
-                            {alert.message}
-                          </Typography>
-                        }
-                        secondary={
-                          <Typography variant="caption" color="text.secondary" component="span">
-                            {alert.time}
-                          </Typography>
-                        }
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Paper>
+              <div>
+                <AlertsList alerts={alerts} loading={loading} />
+              </div>
             </Fade>
           </Box>
         </Box>
 
         <Fade in={!loading} timeout={2200}>
-          <Box sx={{
-            mt: 6,
-            textAlign: 'center',
-            color: '#666'
-          }}>
-            <Paper elevation={1} sx={{
-              p: 3,
-              borderRadius: 3,
-              background: 'white',
-              border: '1px solid #e0e0e0',
-              display: 'inline-block'
+          <div>
+            <Box sx={{
+              mt: 6,
+              textAlign: 'center',
+              color: '#666'
             }}>
-              <Typography variant="h6" sx={{
-                fontWeight: 'bold',
-                textShadow: 'none',
-                mb: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 1,
-                color: '#2E7D32'
+              <Paper elevation={1} sx={{
+                p: 3,
+                borderRadius: 3,
+                background: 'white',
+                border: '1px solid #e0e0e0',
+                display: 'inline-block'
               }}>
-                <CheckCircle sx={{ color: '#2E7D32' }} />
-                ระบบพร้อมใช้งาน - เริ่มต้นการขายได้เลย!
-                <CheckCircle sx={{ color: '#2E7D32' }} />
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                อัพเดทล่าสุด: {lastUpdate.toLocaleDateString('th-TH')} {lastUpdate.toLocaleTimeString('th-TH')}
-              </Typography>
-            </Paper>
-          </Box>
+                <Typography variant="h6" sx={{
+                  fontWeight: 'bold',
+                  textShadow: 'none',
+                  mb: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 1,
+                  color: '#2E7D32'
+                }}>
+                  <CheckCircle sx={{ color: '#2E7D32' }} />
+                  ระบบพร้อมใช้งาน - เริ่มต้นการขายได้เลย!
+                  <CheckCircle sx={{ color: '#2E7D32' }} />
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                  อัพเดทล่าสุด: {lastUpdate.toLocaleDateString('th-TH')} {lastUpdate.toLocaleTimeString('th-TH')}
+                </Typography>
+              </Paper>
+            </Box>
+          </div>
         </Fade>
 
         <Dialog

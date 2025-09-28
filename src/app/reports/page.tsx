@@ -8,42 +8,19 @@ import {
   Paper,
   Card,
   CardContent,
-  Button,
-  Chip,
-  Avatar,
-  IconButton,
-  Menu,
-  MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  Button
 } from '@mui/material';
 import {
-  TrendingUp,
-  TrendingDown,
-  ShoppingCart,
   AttachMoney,
+  ShoppingCart,
   People,
   Inventory,
-  MoreVert,
-  Refresh,
-  FilterList,
   Print as PrintIcon,
   Download as DownloadIcon,
   DateRange as DateRangeIcon,
 } from '@mui/icons-material';
 import AdminLayout from '@/components/AdminLayout';
-
-const mockTopProducts = [
-  { name: 'เอสเพรสโซ', sold: 245, revenue: 36750 },
-  { name: 'คาปูชิโน่', sold: 198, revenue: 31680 },
-  { name: 'เค้กช็อกโกแลต', sold: 156, revenue: 23400 },
-  { name: 'แซนด์วิช', sold: 134, revenue: 20100 },
-  { name: 'มัฟฟิน', sold: 89, revenue: 13350 },
-];
+import { StatCard, TopProductsTable } from '@/components/reports';
 
 export default function ReportsPage() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -55,53 +32,6 @@ export default function ReportsPage() {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-
-  const StatCard = ({ 
-    title, 
-    value, 
-    icon, 
-    trend, 
-    trendValue, 
-    color 
-  }: {
-    title: string;
-    value: string;
-    icon: React.ReactNode;
-    trend: 'up' | 'down';
-    trendValue: string;
-    color: string;
-  }) => (
-    <Card sx={{ height: '100%' }}>
-      <CardContent>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Box>
-            <Typography color="textSecondary" gutterBottom variant="body2">
-              {title}
-            </Typography>
-            <Typography variant="h4" component="div" fontWeight="bold">
-              {value}
-            </Typography>
-            <Box display="flex" alignItems="center" mt={1}>
-              {trend === 'up' ? (
-                <TrendingUp sx={{ color: 'success.main', mr: 0.5 }} fontSize="small" />
-              ) : (
-                <TrendingDown sx={{ color: 'error.main', mr: 0.5 }} fontSize="small" />
-              )}
-              <Typography
-                variant="body2"
-                color={trend === 'up' ? 'success.main' : 'error.main'}
-              >
-                {trendValue}
-              </Typography>
-            </Box>
-          </Box>
-          <Avatar sx={{ bgcolor: color, width: 56, height: 56 }}>
-            {icon}
-          </Avatar>
-        </Box>
-      </CardContent>
-    </Card>
-  );
 
   return (
     <AdminLayout>
@@ -186,64 +116,12 @@ export default function ReportsPage() {
         </Box>
 
         {/* Tables Section */}
-        <Card>
-          <CardContent>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h6">
-                สินค้าขายดี
-              </Typography>
-              <IconButton onClick={handleMenuClick}>
-                <MoreVert />
-              </IconButton>
-            </Box>
-            
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>อันดับ</TableCell>
-                    <TableCell>ชื่อสินค้า</TableCell>
-                    <TableCell align="right">จำนวนขาย</TableCell>
-                    <TableCell align="right">รายได้</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {mockTopProducts.map((product, index) => (
-                    <TableRow key={product.name}>
-                      <TableCell>
-                        <Chip 
-                          label={index + 1} 
-                          color={index < 3 ? 'primary' : 'default'}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>{product.name}</TableCell>
-                      <TableCell align="right">{product.sold}</TableCell>
-                      <TableCell align="right">
-                        ฿{product.revenue.toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-
-        <Menu
+        <TopProductsTable
+          products={mockTopProducts}
           anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-        >
-          <MenuItem onClick={handleMenuClose}>
-            <Refresh sx={{ mr: 2 }} />
-            รีเฟรชข้อมูล
-          </MenuItem>
-          <MenuItem onClick={handleMenuClose}>
-            <FilterList sx={{ mr: 2 }} />
-            กรองข้อมูล
-          </MenuItem>
-        </Menu>
+          onMenuClick={handleMenuClick}
+          onMenuClose={handleMenuClose}
+        />
       </Container>
     </AdminLayout>
   );

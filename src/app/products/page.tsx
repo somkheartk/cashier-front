@@ -7,46 +7,19 @@ import {
   CardContent,
   Typography,
   Button,
-  TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Snackbar,
-  IconButton,
-  Tooltip,
-  Grid,
   AppBar,
   Toolbar,
   Avatar,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  Snackbar,
+  Alert,
   Fab
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Visibility as ViewIcon,
-  Search as SearchIcon,
-  Refresh as RefreshIcon,
-  Inventory as InventoryIcon,
-  Category as CategoryIcon,
-  ShoppingCart as ShoppingCartIcon
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { apiService, type Product } from '@/services/api';
+import { ProductFilters, ProductsTable, ProductFormDialog, DeleteProductDialog } from '@/components/products';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -248,41 +221,13 @@ export default function ProductsPage() {
       {/* Content */}
       <Box sx={{ flex: 1, p: 3, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {/* Filter Controls */}
-        <Card sx={{ mb: 2 }}>
-          <CardContent>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  placeholder="ค้นหาสินค้า (ชื่อ, บาร์โค้ด)..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  InputProps={{
-                    startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-                  }}
-                  className="thai-body"
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel>หมวดหมู่</InputLabel>
-                  <Select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    label="หมวดหมู่"
-                  >
-                    <MenuItem value="all">ทั้งหมด</MenuItem>
-                    {categories.map((category) => (
-                      <MenuItem key={category} value={category}>
-                        {category}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
+        <ProductFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          categories={categories}
+        />
 
         {/* Products Table */}
         <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -291,220 +236,36 @@ export default function ProductsPage() {
               📋 รายการสินค้า ({filteredProducts.length} รายการ)
             </Typography>
 
-            {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-                <CircularProgress />
-              </Box>
-            ) : filteredProducts.length === 0 ? (
-              <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Typography variant="h6" color="text.secondary">
-                  ไม่พบสินค้า
-                </Typography>
-              </Box>
-            ) : (
-              <TableContainer component={Paper} sx={{ flex: 1 }}>
-                <Table stickyHeader>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell className="thai-text" sx={{ fontWeight: 'bold' }}>บาร์โค้ด</TableCell>
-                      <TableCell className="thai-text" sx={{ fontWeight: 'bold' }}>ชื่อสินค้า</TableCell>
-                      <TableCell className="thai-text" sx={{ fontWeight: 'bold' }}>หมวดหมู่</TableCell>
-                      <TableCell className="thai-text" sx={{ fontWeight: 'bold' }}>ราคา</TableCell>
-                      <TableCell className="thai-text" sx={{ fontWeight: 'bold' }}>คงเหลือ</TableCell>
-                      <TableCell className="thai-text" sx={{ fontWeight: 'bold' }}>สถานะ</TableCell>
-                      <TableCell className="thai-text" sx={{ fontWeight: 'bold' }}>การจัดการ</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filteredProducts.map((product) => (
-                      <TableRow key={product.id} hover>
-                        <TableCell className="thai-text">{product.barcode || '-'}</TableCell>
-                        <TableCell className="thai-text" sx={{ fontWeight: 'bold' }}>
-                          {product.name}
-                        </TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={product.category} 
-                            size="small" 
-                            color="secondary"
-                            variant="outlined"
-                          />
-                        </TableCell>
-                        <TableCell className="thai-text" sx={{ fontWeight: 'bold' }}>
-                          ฿{product.price.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="thai-text">
-                          <Chip
-                            label={`${product.stock} ชิ้น`}
-                            color={product.stock > 10 ? 'success' : product.stock > 0 ? 'warning' : 'error'}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={product.stock > 0 ? 'มีสินค้า' : 'หมด'}
-                            color={product.stock > 0 ? 'success' : 'error'}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Tooltip title="แก้ไข">
-                            <IconButton 
-                              size="small" 
-                              onClick={() => handleEditProduct(product)}
-                              color="primary"
-                            >
-                              <EditIcon />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="ลบ">
-                            <IconButton 
-                              size="small" 
-                              onClick={() => handleDeleteProduct(product)}
-                              color="error"
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
+            <ProductsTable
+              products={filteredProducts}
+              loading={loading}
+              onEditProduct={handleEditProduct}
+              onDeleteProduct={handleDeleteProduct}
+            />
           </CardContent>
         </Card>
       </Box>
 
       {/* Add/Edit Product Dialog */}
-      <Dialog 
-        open={productDialog} 
+      <ProductFormDialog
+        open={productDialog}
         onClose={() => setProductDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle component="div">
-          <Typography variant="h6" className="thai-heading">
-            {selectedProduct ? '✏️ แก้ไขสินค้า' : '➕ เพิ่มสินค้าใหม่'}
-          </Typography>
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 2 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="ชื่อสินค้า"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="บาร์โค้ด"
-                  value={formData.barcode}
-                  onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="คำอธิบาย"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  multiline
-                  rows={2}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  fullWidth
-                  label="ราคา"
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <FormControl fullWidth required>
-                  <InputLabel>หมวดหมู่</InputLabel>
-                  <Select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    label="หมวดหมู่"
-                  >
-                    {categories.map((category) => (
-                      <MenuItem key={category} value={category}>
-                        {category}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <TextField
-                  fullWidth
-                  label="จำนวนสต็อก"
-                  type="number"
-                  value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="แท็ก (คั่นด้วยจุลภาค)"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                  placeholder="ร้อน, เย็น, หวาน"
-                />
-              </Grid>
-            </Grid>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setProductDialog(false)}>
-            ยกเลิก
-          </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleSaveProduct}
-            disabled={!formData.name || !formData.price || !formData.category || !formData.stock}
-          >
-            {selectedProduct ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        formData={formData}
+        onFormDataChange={setFormData}
+        onSave={handleSaveProduct}
+        categories={categories}
+        isEditing={!!selectedProduct}
+        loading={loading}
+      />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog 
-        open={deleteDialog} 
+      <DeleteProductDialog
+        open={deleteDialog}
         onClose={() => setDeleteDialog(false)}
-      >
-        <DialogTitle>ยืนยันการลบสินค้า</DialogTitle>
-        <DialogContent>
-          <Typography className="thai-text">
-            คุณแน่ใจหรือไม่ที่จะลบสินค้า "{selectedProduct?.name}" ?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialog(false)}>
-            ยกเลิก
-          </Button>
-          <Button 
-            variant="contained" 
-            color="error" 
-            onClick={confirmDeleteProduct}
-          >
-            ลบ
-          </Button>
-        </DialogActions>
-      </Dialog>
+        product={selectedProduct}
+        onConfirm={confirmDeleteProduct}
+        loading={loading}
+      />
 
       {/* Floating Action Button */}
       <Fab

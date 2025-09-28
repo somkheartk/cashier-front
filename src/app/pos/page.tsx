@@ -77,6 +77,7 @@ import {
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@mui/material/styles';
+import { ProductCard, SearchAndFilters, ProductGrid, CartItem, CartSummary } from '../../components/pos';
 
 // Types
 interface Product {
@@ -679,225 +680,24 @@ export default function POSPage() {
             >
               <Box sx={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
                 {/* Enhanced Search and Filters */}
-                <Box sx={{ mb: 3 }}>
-                  <TextField
-                    fullWidth
-                    placeholder="🔍 ค้นหาสินค้า... (Ctrl+F)"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    inputRef={searchInputRef}
-                    InputProps={{
-                      startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
-                      endAdornment: searchTerm && (
-                        <IconButton size="small" onClick={() => setSearchTerm('')}>
-                          <Clear sx={{ fontSize: 18 }} />
-                        </IconButton>
-                      )
-                    }}
-                    sx={{
-                      mb: 2,
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 3,
-                        background: 'rgba(255,255,255,0.8)',
-                        '&:hover': {
-                          background: 'rgba(255,255,255,0.9)'
-                        },
-                        '&.Mui-focused': {
-                          background: 'white',
-                          boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.1)'
-                        }
-                      }
-                    }}
-                  />
-
-                  {/* Enhanced Category Filters */}
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                    {categories.map((category) => (
-                      <Chip
-                        key={category}
-                        label={category}
-                        onClick={() => setSelectedCategory(category)}
-                        variant={selectedCategory === category ? 'filled' : 'outlined'}
-                        color={selectedCategory === category ? 'primary' : 'default'}
-                        sx={{
-                          borderRadius: 2,
-                          fontWeight: 'medium',
-                          '&:hover': {
-                            transform: 'translateY(-1px)',
-                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                          },
-                          transition: 'all 0.2s ease'
-                        }}
-                      />
-                    ))}
-                  </Box>
-
-                  {/* Sort Options */}
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                      เรียงตาม:
-                    </Typography>
-                    {[
-                      { value: 'name', label: 'ชื่อ' },
-                      { value: 'price', label: 'ราคา' },
-                      { value: 'stock', label: 'สต็อก' }
-                    ].map((option) => (
-                      <Chip
-                        key={option.value}
-                        label={option.label}
-                        size="small"
-                        onClick={() => setSortBy(option.value as 'name' | 'price' | 'stock')}
-                        variant={sortBy === option.value ? 'filled' : 'outlined'}
-                        color={sortBy === option.value ? 'secondary' : 'default'}
-                      />
-                    ))}
-                  </Box>
-                </Box>
+                <SearchAndFilters
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  searchInputRef={searchInputRef}
+                  categories={categories}
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={setSelectedCategory}
+                  sortBy={sortBy}
+                  onSortChange={setSortBy}
+                />
 
                 {/* Enhanced Products Grid */}
                 <Box sx={{ flex: 1, overflow: 'auto', pr: 1 }}>
-                  {loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                      <CircularProgress sx={{ color: '#667eea' }} />
-                    </Box>
-                  ) : filteredProducts.length === 0 ? (
-                    <Box sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: '100%',
-                      color: 'text.secondary'
-                    }}>
-                      <Inventory sx={{ fontSize: 64, mb: 2, opacity: 0.3 }} />
-                      <Typography variant="h6" gutterBottom>ไม่พบสินค้า</Typography>
-                      <Typography variant="body2">ลองเปลี่ยนคำค้นหาหรือหมวดหมู่</Typography>
-                    </Box>
-                  ) : (
-                    <Box sx={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                      gap: 2
-                    }}>
-                      {filteredProducts.map((product) => (
-                        <Card
-                          key={product.id}
-                          sx={{
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            height: 200,
-                            position: 'relative',
-                            overflow: 'hidden',
-                            borderRadius: 3,
-                            border: '1px solid rgba(0,0,0,0.08)',
-                            '&:hover': {
-                              transform: 'translateY(-8px) scale(1.02)',
-                              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
-                              borderColor: '#667eea'
-                            },
-                            '&::before': {
-                              content: '""',
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
-                              opacity: 0,
-                              transition: 'opacity 0.3s ease'
-                            },
-                            '&:hover::before': {
-                              opacity: 1
-                            }
-                          }}
-                          onClick={() => addToCart(product)}
-                        >
-                          <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                            {/* Product Image Placeholder */}
-                            <Box sx={{
-                              width: 60,
-                              height: 60,
-                              borderRadius: 2,
-                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              mb: 2,
-                              alignSelf: 'center'
-                            }}>
-                              <Inventory sx={{ color: 'white', fontSize: 30 }} />
-                            </Box>
-
-                            <Typography
-                              variant="h6"
-                              gutterBottom
-                              sx={{
-                                fontWeight: 'bold',
-                                fontSize: '1.1rem',
-                                textAlign: 'center',
-                                mb: 1,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical'
-                              }}
-                            >
-                              {product.name}
-                            </Typography>
-
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ textAlign: 'center', mb: 2 }}
-                            >
-                              {product.category}
-                            </Typography>
-
-                            <Box sx={{
-                              mt: 'auto',
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center'
-                            }}>
-                              <Typography
-                                variant="h6"
-                                sx={{
-                                  fontWeight: 'bold',
-                                  color: '#2E7D32',
-                                  fontSize: '1.2rem'
-                                }}
-                              >
-                                ฿{product.price}
-                              </Typography>
-
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Chip
-                                  label={`คงเหลือ ${product.stock}`}
-                                  size="small"
-                                  sx={{
-                                    height: 24,
-                                    fontSize: '0.7rem',
-                                    backgroundColor: product.stock > 10 ? '#E8F5E8' :
-                                                   product.stock > 5 ? '#FFF3E0' : '#FFEBEE',
-                                    color: product.stock > 10 ? '#2E7D32' :
-                                           product.stock > 5 ? '#E65100' : '#C62828'
-                                  }}
-                                />
-                                <Add sx={{
-                                  color: '#667eea',
-                                  fontSize: 20,
-                                  backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                                  borderRadius: '50%',
-                                  p: 0.5
-                                }} />
-                              </Box>
-                            </Box>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </Box>
-                  )}
+                  <ProductGrid
+                    loading={loading}
+                    filteredProducts={filteredProducts}
+                    onAddToCart={addToCart}
+                  />
                 </Box>
               </Box>
             </Paper>
@@ -985,115 +785,12 @@ export default function POSPage() {
                   ) : (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                       {cart.map((item) => (
-                        <Card
+                        <CartItem
                           key={item.product.id}
-                          elevation={0}
-                          sx={{
-                            borderRadius: 2,
-                            border: '1px solid rgba(0,0,0,0.08)',
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                              borderColor: '#667eea'
-                            }
-                          }}
-                        >
-                          <CardContent sx={{ p: 2 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                              <Box sx={{ flex: 1, mr: 2 }}>
-                                <Typography
-                                  variant="subtitle1"
-                                  sx={{
-                                    fontWeight: 'bold',
-                                    fontSize: '0.95rem',
-                                    mb: 0.5,
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap'
-                                  }}
-                                >
-                                  {item.product.name}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  ฿{item.product.price} × {item.quantity}
-                                </Typography>
-                              </Box>
-                              <IconButton
-                                size="small"
-                                onClick={() => removeFromCart(item.product.id)}
-                                sx={{
-                                  color: '#f44336',
-                                  backgroundColor: 'rgba(244, 67, 54, 0.1)',
-                                  '&:hover': {
-                                    backgroundColor: 'rgba(244, 67, 54, 0.2)'
-                                  }
-                                }}
-                              >
-                                <Delete fontSize="small" />
-                              </IconButton>
-                            </Box>
-
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                                  disabled={item.quantity <= 1}
-                                  sx={{
-                                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                                    color: '#667eea',
-                                    '&:hover': {
-                                      backgroundColor: 'rgba(102, 126, 234, 0.2)'
-                                    },
-                                    '&.Mui-disabled': {
-                                      backgroundColor: 'rgba(0,0,0,0.05)',
-                                      color: 'text.disabled'
-                                    }
-                                  }}
-                                >
-                                  <Remove fontSize="small" />
-                                </IconButton>
-                                <Typography sx={{
-                                  mx: 2,
-                                  fontWeight: 'bold',
-                                  minWidth: 30,
-                                  textAlign: 'center'
-                                }}>
-                                  {item.quantity}
-                                </Typography>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                                  disabled={item.quantity >= item.product.stock}
-                                  sx={{
-                                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                                    color: '#667eea',
-                                    '&:hover': {
-                                      backgroundColor: 'rgba(102, 126, 234, 0.2)'
-                                    },
-                                    '&.Mui-disabled': {
-                                      backgroundColor: 'rgba(0,0,0,0.05)',
-                                      color: 'text.disabled'
-                                    }
-                                  }}
-                                >
-                                  <Add fontSize="small" />
-                                </IconButton>
-                              </Box>
-
-                              <Typography
-                                variant="h6"
-                                sx={{
-                                  fontWeight: 'bold',
-                                  color: '#2E7D32',
-                                  fontSize: '1.1rem'
-                                }}
-                              >
-                                ฿{item.subtotal.toFixed(2)}
-                              </Typography>
-                            </Box>
-                          </CardContent>
-                        </Card>
+                          item={item}
+                          onRemoveFromCart={removeFromCart}
+                          onUpdateQuantity={updateQuantity}
+                        />
                       ))}
                     </Box>
                   )}
@@ -1101,87 +798,14 @@ export default function POSPage() {
 
                 {/* Enhanced Total and Payment */}
                 {cart.length > 0 && (
-                  <>
-                    <Divider sx={{ my: 2 }} />
-
-                    {/* Order Summary */}
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#667eea' }}>
-                        สรุปคำสั่งซื้อ
-                      </Typography>
-
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" color="text.secondary">
-                            จำนวนรายการ:
-                          </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                            {totalItems} รายการ
-                          </Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" color="text.secondary">
-                            ยอดรวม:
-                          </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                            ฿{subtotal.toFixed(2)}
-                          </Typography>
-                        </Box>
-
-                        {discountPercent > 0 && (
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <Typography variant="body2" color="error">
-                              ส่วนลด ({discountPercent}%):
-                            </Typography>
-                            <Typography variant="body2" color="error" sx={{ fontWeight: 'medium' }}>
-                              -฿{discountAmount.toFixed(2)}
-                            </Typography>
-                          </Box>
-                        )}
-
-                        <Divider sx={{ my: 1 }} />
-
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
-                            ยอดชำระทั้งสิ้น:
-                          </Typography>
-                          <Typography variant="h6" sx={{
-                            fontWeight: 'bold',
-                            color: '#2E7D32',
-                            fontSize: '1.3rem'
-                          }}>
-                            ฿{totalAmount.toFixed(2)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Box>
-
-                    {/* Payment Button */}
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      size="large"
-                      startIcon={<Payment />}
-                      onClick={() => setPaymentDialog(true)}
-                      sx={{
-                        borderRadius: 3,
-                        py: 2,
-                        fontSize: '1.1rem',
-                        fontWeight: 'bold',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
-                        '&:hover': {
-                          background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)'
-                        },
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      ชำระเงิน (Enter)
-                    </Button>
-                  </>
+                  <CartSummary
+                    totalItems={totalItems}
+                    subtotal={subtotal}
+                    discountPercent={discountPercent}
+                    discountAmount={discountAmount}
+                    totalAmount={totalAmount}
+                    onPaymentClick={() => setPaymentDialog(true)}
+                  />
                 )}
               </Box>
             </Paper>
