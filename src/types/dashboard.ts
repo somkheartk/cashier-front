@@ -29,7 +29,14 @@ export interface RecentOrder {
   id: string;
   customer: string;
   total: number;
-  status: 'completed' | 'pending' | 'cancelled';
+  status: 'completed' | 'pending';
   time: string;
-  items: number;
+}
+
+export interface RecentOrder {
+  id: string;
+  customer: string;
+  total: number;
+  status: 'completed' | 'pending';
+  time: string;
 }

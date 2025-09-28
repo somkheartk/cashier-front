@@ -13,25 +13,7 @@ import {
   Typography,
   Divider
 } from '@mui/material';
-
-interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  membershipLevel: 'bronze' | 'silver' | 'gold';
-  totalOrders: number;
-  totalSpent: number;
-  lastOrderDate: string;
-  avatar?: string;
-}
-
-interface CustomerFormData {
-  name: string;
-  email: string;
-  phone: string;
-  membershipLevel: Customer['membershipLevel'];
-}
+import { Customer, CustomerFormData } from '@/types/customers';
 
 interface CustomerFormDialogProps {
   open: boolean;

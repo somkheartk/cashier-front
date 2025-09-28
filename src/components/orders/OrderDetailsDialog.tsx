@@ -15,24 +15,7 @@ import {
   ListItemSecondaryAction
 } from '@mui/material';
 import { Print as PrintIcon } from '@mui/icons-material';
-
-interface OrderItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-interface Order {
-  id: number;
-  customerName: string;
-  customerPhone: string;
-  items: OrderItem[];
-  total: number;
-  status: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
-  createdAt: Date;
-  tableNumber?: string;
-}
+import { Order, OrderItem } from '@/types/orders';
 
 interface OrderDetailsDialogProps {
   open: boolean;

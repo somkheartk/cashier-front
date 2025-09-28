@@ -18,7 +18,8 @@ import {
   Add as AddIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
-import { apiService, type Product } from '@/services/api';
+import { apiService } from '@/services/api';
+import { Product } from '@/types';
 import { ProductFilters, ProductsTable, ProductFormDialog, DeleteProductDialog } from '@/components/products';
 
 export default function ProductsPage() {

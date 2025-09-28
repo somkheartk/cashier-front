@@ -8,14 +8,7 @@ import {
 } from '@mui/material';
 import { Delete, Remove, Add } from '@mui/icons-material';
 import { Product } from '@/types/products';
-
-interface CartItemData {
-  product: Product;
-  quantity: number;
-  subtotal: number;
-  discount?: number;
-  notes?: string;
-}
+import { CartItemData } from '@/types/pos';
 
 interface CartItemProps {
   item: CartItemData;

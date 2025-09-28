@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -16,24 +16,7 @@ import {
   Search as SearchIcon
 } from '@mui/icons-material';
 import { OrderStatusCards, OrdersTable, OrderDetailsDialog, NewOrderDialog } from '@/components/orders';
-
-interface OrderItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-interface Order {
-  id: number;
-  customerName: string;
-  customerPhone: string;
-  items: OrderItem[];
-  total: number;
-  status: 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
-  createdAt: Date;
-  tableNumber?: string;
-}
+import { Order, OrderItem } from '@/types';
 
 // Mock data
 const mockOrders: Order[] = [
@@ -117,17 +100,17 @@ export default function OrdersPage() {
     ));
   };
 
-  const filteredOrders = orders.filter(order => 
+  const filteredOrders = useMemo(() => orders.filter(order => 
     filterStatus === 'all' || order.status === filterStatus
-  );
+  ), [orders, filterStatus]);
 
   // Count orders by status
-  const statusCounts = {
+  const statusCounts = useMemo(() => ({
     pending: orders.filter(o => o.status === 'pending').length,
     preparing: orders.filter(o => o.status === 'preparing').length,
     ready: orders.filter(o => o.status === 'ready').length,
     completed: orders.filter(o => o.status === 'completed').length,
-  };
+  }), [orders]);
 
   return (
     <Box>

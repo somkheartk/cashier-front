@@ -12,17 +12,10 @@ import {
   Box
 } from '@mui/material';
 import { Receipt } from '@mui/icons-material';
-
-interface Order {
-  id: string;
-  customer: string;
-  total: number;
-  status: 'completed' | 'pending';
-  time: string;
-}
+import { RecentOrder } from '@/types/dashboard';
 
 interface RecentOrdersProps {
-  orders: Order[];
+  orders: RecentOrder[];
   loading: boolean;
 }
 

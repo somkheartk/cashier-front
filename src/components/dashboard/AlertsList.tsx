@@ -9,15 +9,10 @@ import {
   Avatar
 } from '@mui/material';
 import { Notifications, Warning, CheckCircle, Error, Info } from '@mui/icons-material';
-
-interface Alert {
-  type: 'warning' | 'success' | 'error' | 'info';
-  message: string;
-  time: string;
-}
+import { AlertData } from '@/types/dashboard';
 
 interface AlertsListProps {
-  alerts: Alert[];
+  alerts: AlertData[];
   loading: boolean;
 }
 

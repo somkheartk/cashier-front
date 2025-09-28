@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -8,18 +8,7 @@ import {
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { CustomerStatsCards, CustomersTable, CustomerFormDialog } from '@/components/customers';
-
-interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  membershipLevel: 'bronze' | 'silver' | 'gold';
-  totalOrders: number;
-  totalSpent: number;
-  lastOrderDate: string;
-  avatar?: string;
-}
+import { Customer } from '@/types';
 
 // Mock data
 const mockCustomers: Customer[] = [
@@ -87,13 +76,13 @@ export default function CustomersPage() {
   });
 
   // Statistics
-  const stats = {
+  const stats = useMemo(() => ({
     total: customers.length,
     bronze: customers.filter(c => c.membershipLevel === 'bronze').length,
     silver: customers.filter(c => c.membershipLevel === 'silver').length,
     gold: customers.filter(c => c.membershipLevel === 'gold').length,
-    avgSpent: Math.round(customers.reduce((acc, c) => acc + c.totalSpent, 0) / customers.length)
-  };
+    avgSpent: customers.length > 0 ? Math.round(customers.reduce((acc, c) => acc + c.totalSpent, 0) / customers.length) : 0
+  }), [customers]);
 
   const handleAddCustomer = () => {
     setSelectedCustomer(null);

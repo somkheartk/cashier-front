@@ -14,16 +14,7 @@ import {
   MenuItem,
   Typography
 } from '@mui/material';
-
-interface ProductFormData {
-  name: string;
-  description: string;
-  price: string;
-  category: string;
-  barcode: string;
-  stock: string;
-  tags: string;
-}
+import { ProductFormData } from '@/types/products';
 
 interface ProductFormDialogProps {
   open: boolean;

@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -78,45 +78,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@mui/material/styles';
 import { ProductCard, SearchAndFilters, ProductGrid, CartItem, CartSummary } from '../../components/pos';
-
-// Types
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  category: string;
-  stock: number;
-  image?: string;
-  barcode?: string;
-  description?: string;
-  discount?: number;
-}
-
-interface CartItem {
-  product: Product;
-  quantity: number;
-  subtotal: number;
-  discount?: number;
-  notes?: string;
-}
-
-interface PaymentMethod {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  color: string;
-}
-
-interface Order {
-  id: string;
-  items: CartItem[];
-  total: number;
-  paymentMethod: string;
-  cashReceived: number;
-  change: number;
-  timestamp: Date;
-  customerName?: string;
-}
+import { Product, CartItemData, PaymentMethod, CompletedOrder } from '@/types';
 
 export default function POSPage() {
   const router = useRouter();
@@ -124,7 +86,7 @@ export default function POSPage() {
 
   // State
   const [products, setProducts] = useState<Product[]>([]);
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItemData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ทั้งหมด');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -139,8 +101,8 @@ export default function POSPage() {
 
   // Receipt and order history
   const [showReceipt, setShowReceipt] = useState(false);
-  const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
-  const [orderHistory, setOrderHistory] = useState<Order[]>([]);
+  const [currentOrder, setCurrentOrder] = useState<CompletedOrder | null>(null);
+  const [orderHistory, setOrderHistory] = useState<CompletedOrder[]>([]);
 
   // UI states
   const [notification, setNotification] = useState({ open: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
@@ -166,18 +128,18 @@ export default function POSPage() {
     try {
       // Enhanced mock data with more details
       const mockProducts: Product[] = [
-        { id: 1, name: 'กาแฟดำร้อน', price: 35, category: 'เครื่องดื่มร้อน', stock: 20, barcode: '1001', description: 'กาแฟดำแท้ 100%' },
-        { id: 2, name: 'กาแฟนมร้อน', price: 45, category: 'เครื่องดื่มร้อน', stock: 15, barcode: '1002', description: 'กาแฟนมสูตรพิเศษ' },
-        { id: 3, name: 'ชาเขียวมัทฉะ', price: 55, category: 'เครื่องดื่มร้อน', stock: 12, barcode: '1003', description: 'ชาเขียวญี่ปุ่นแท้' },
-        { id: 4, name: 'ลาเต้ชาไทย', price: 50, category: 'เครื่องดื่มร้อน', stock: 18, barcode: '1004', description: 'ลาเต้สูตรไทย' },
-        { id: 5, name: 'น้ำส้มสด', price: 40, category: 'เครื่องดื่มเย็น', stock: 25, barcode: '2001', description: 'น้ำส้มสดคั้นใหม่' },
-        { id: 6, name: 'ชานมเย็น', price: 35, category: 'เครื่องดื่มเย็น', stock: 22, barcode: '2002', description: 'ชานมเย็นสูตรเย็น' },
-        { id: 7, name: 'ขนมปังสังขยา', price: 25, category: 'ขนม', stock: 15, barcode: '3001', description: 'ขนมปังสังขยาโฮมเมด' },
-        { id: 8, name: 'ครัวซองต์', price: 30, category: 'ขนม', stock: 12, barcode: '3002', description: 'ครัวซองต์เนยสด' },
-        { id: 9, name: 'เค้กช็อกโกแลต', price: 85, category: 'ขนม', stock: 8, barcode: '3003', description: 'เค้กช็อกโกแลต 3 ชั้น' },
-        { id: 10, name: 'แซนด์วิชไก่', price: 75, category: 'อาหาร', stock: 10, barcode: '4001', description: 'แซนด์วิชไก่ย่าง' },
-        { id: 11, name: 'สลัดผัก', price: 65, category: 'อาหาร', stock: 14, barcode: '4002', description: 'สลัดผักสดรวม' },
-        { id: 12, name: 'โยเกิร์ตกรีก', price: 45, category: 'ของหวาน', stock: 20, barcode: '5001', description: 'โยเกิร์ตกรีกแท้' }
+        { id: '1', name: 'กาแฟดำร้อน', price: 35, category: 'เครื่องดื่มร้อน', stock: 20, barcode: '1001', description: 'กาแฟดำแท้ 100%' },
+        { id: '2', name: 'กาแฟนมร้อน', price: 45, category: 'เครื่องดื่มร้อน', stock: 15, barcode: '1002', description: 'กาแฟนมสูตรพิเศษ' },
+        { id: '3', name: 'ชาเขียวมัทฉะ', price: 55, category: 'เครื่องดื่มร้อน', stock: 12, barcode: '1003', description: 'ชาเขียวญี่ปุ่นแท้' },
+        { id: '4', name: 'ลาเต้ชาไทย', price: 50, category: 'เครื่องดื่มร้อน', stock: 18, barcode: '1004', description: 'ลาเต้สูตรไทย' },
+        { id: '5', name: 'น้ำส้มสด', price: 40, category: 'เครื่องดื่มเย็น', stock: 25, barcode: '2001', description: 'น้ำส้มสดคั้นใหม่' },
+        { id: '6', name: 'ชานมเย็น', price: 35, category: 'เครื่องดื่มเย็น', stock: 22, barcode: '2002', description: 'ชานมเย็นสูตรเย็น' },
+        { id: '7', name: 'ขนมปังสังขยา', price: 25, category: 'ขนม', stock: 15, barcode: '3001', description: 'ขนมปังสังขยาโฮมเมด' },
+        { id: '8', name: 'ครัวซองต์', price: 30, category: 'ขนม', stock: 12, barcode: '3002', description: 'ครัวซองต์เนยสด' },
+        { id: '9', name: 'เค้กช็อกโกแลต', price: 85, category: 'ขนม', stock: 8, barcode: '3003', description: 'เค้กช็อกโกแลต 3 ชั้น' },
+        { id: '10', name: 'แซนด์วิชไก่', price: 75, category: 'อาหาร', stock: 10, barcode: '4001', description: 'แซนด์วิชไก่ย่าง' },
+        { id: '11', name: 'สลัดผัก', price: 65, category: 'อาหาร', stock: 14, barcode: '4002', description: 'สลัดผักสดรวม' },
+        { id: '12', name: 'โยเกิร์ตกรีก', price: 45, category: 'ของหวาน', stock: 20, barcode: '5001', description: 'โยเกิร์ตกรีกแท้' }
       ];
 
       setProducts(mockProducts);
@@ -195,17 +157,17 @@ export default function POSPage() {
   }, [loadProducts]);
 
   // Enhanced calculations
-  const subtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
-  const discountAmount = (subtotal * discountPercent) / 100;
-  const totalAmount = subtotal - discountAmount;
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const change = cashAmount ? Math.max(0, parseFloat(cashAmount) - totalAmount) : 0;
+  const subtotal = useMemo(() => cart.reduce((sum, item) => sum + item.subtotal, 0), [cart]);
+  const discountAmount = useMemo(() => (subtotal * discountPercent) / 100, [subtotal, discountPercent]);
+  const totalAmount = useMemo(() => subtotal - discountAmount, [subtotal, discountAmount]);
+  const totalItems = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
+  const change = useMemo(() => cashAmount ? Math.max(0, parseFloat(cashAmount) - totalAmount) : 0, [cashAmount, totalAmount]);
 
   // Enhanced filtering and sorting
-  const categories = ['ทั้งหมด', ...Array.from(new Set(products.map(p => p.category)))];
+  const categories = useMemo(() => ['ทั้งหมด', ...Array.from(new Set(products.map(p => p.category)))], [products]);
 
   // Enhanced filtering and sorting
-  const filteredAndSortedProducts = products
+  const filteredAndSortedProducts = useMemo(() => products
     .filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            product.barcode?.includes(searchTerm);
@@ -221,7 +183,7 @@ export default function POSPage() {
         default:
           return a.name.localeCompare(b.name);
       }
-    });
+    }), [products, searchTerm, selectedCategory, sortBy]);
 
   const filteredProducts = filteredAndSortedProducts;
 
@@ -253,7 +215,7 @@ export default function POSPage() {
     setNotification({ open: true, message: `เพิ่ม ${product.name} ลงตะกร้าแล้ว`, type: 'success' });
   }, [cart]);
 
-  const updateQuantity = useCallback((productId: number, newQuantity: number) => {
+  const updateQuantity = useCallback((productId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
       setCart(cart.filter(item => item.product.id !== productId));
       return;
@@ -272,7 +234,7 @@ export default function POSPage() {
     ));
   }, [cart]);
 
-  const removeFromCart = useCallback((productId: number) => {
+  const removeFromCart = useCallback((productId: string) => {
     setCart(cart.filter(item => item.product.id !== productId));
     setNotification({ open: true, message: 'ลบสินค้าออกจากตะกร้าแล้ว', type: 'info' });
   }, [cart]);
@@ -296,7 +258,7 @@ export default function POSPage() {
 
     try {
       // Create order
-      const order: Order = {
+      const order: CompletedOrder = {
         id: `ORD-${Date.now()}`,
         items: cart,
         total: totalAmount,

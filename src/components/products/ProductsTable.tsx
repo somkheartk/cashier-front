@@ -18,7 +18,7 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon
 } from '@mui/icons-material';
-import { Product } from '@/services/api';
+import { Product } from '@/types';
 
 interface ProductsTableProps {
   products: Product[];

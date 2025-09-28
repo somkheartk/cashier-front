@@ -8,9 +8,12 @@ export interface Product {
   description?: string;
 }
 
-export interface CartItem {
+export interface CartItemData {
   product: Product;
   quantity: number;
+  subtotal: number;
+  discount?: number;
+  notes?: string;
 }
 
 export interface OrderItem {
@@ -35,4 +38,22 @@ export interface SearchFilters {
   searchTerm: string;
   category: string;
   priceRange: [number, number];
+}
+
+export interface PaymentMethod {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  color: string;
+}
+
+export interface CompletedOrder {
+  id: string;
+  items: CartItemData[];
+  total: number;
+  paymentMethod: string;
+  cashReceived: number;
+  change: number;
+  timestamp: Date;
+  customerName?: string;
 }

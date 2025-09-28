@@ -7,16 +7,7 @@ import {
   Button,
   Typography
 } from '@mui/material';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  stock: number;
-  barcode?: string;
-  description?: string;
-}
+import { Product } from '@/types/products';
 
 interface DeleteProductDialogProps {
   open: boolean;

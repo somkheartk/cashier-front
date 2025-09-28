@@ -1,6 +1,8 @@
 // API Configuration
 const API_BASE_URL = 'http://localhost:7800';
 
+import { Product, CartItemData as CartItem, Customer, Order } from '@/types';
+
 class ApiService {
   private getAuthHeaders() {
     const token = localStorage.getItem('token');
@@ -135,48 +137,7 @@ class ApiService {
 
 export const apiService = new ApiService();
 
-// Types
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  barcode?: string;
-  stock: number;
-  image?: string;
-  description?: string;
-}
-
-export interface CartItem {
-  product: Product;
-  quantity: number;
-  subtotal: number;
-  discount?: number;
-}
-
-export interface Customer {
-  id: string;
-  name: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  loyaltyPoints?: number;
-}
-
-export interface Order {
-  id: string;
-  customerId?: string;
-  items: CartItem[];
-  subtotal: number;
-  tax: number;
-  discount: number;
-  total: number;
-  paymentMethod: 'cash' | 'card' | 'mobile';
-  status: 'pending' | 'completed' | 'cancelled';
-  createdAt: string;
-  updatedAt: string;
-}
-
+// API-specific types
 export interface CreateOrderRequest {
   customerId?: string;
   items: {
