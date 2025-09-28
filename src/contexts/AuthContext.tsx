@@ -15,7 +15,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   hasRole: (role: string) => boolean;
   hasAnyRole: (roles: string[]) => boolean;
   switchRole: (role: string) => void;
@@ -89,14 +89,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    document.cookie = 'isLoggedIn=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
-    
-    setUser(null);
-    router.push('/login');
+  const logout = async () => {
+    try {
+      console.log('Starting logout process...');
+
+      // Clear localStorage
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+
+      // Clear cookie by setting expired date
+      document.cookie = 'isLoggedIn=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax';
+
+      // Clear user state
+      setUser(null);
+
+      console.log('User state cleared, redirecting to login...');
+
+      // Small delay to ensure state is cleared
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Force redirect using window.location for reliability
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force redirect even if there's an error
+      window.location.href = '/login';
+    }
   };
 
   const hasRole = (role: string): boolean => {

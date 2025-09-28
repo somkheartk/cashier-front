@@ -11,7 +11,8 @@
 :root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Kanit', 'Inter', 'Roboto', sans-serif;
+  --font-sans: var(--font-kanit), var(--font-sarabun), var(--font-prompt), 'Inter', 'Roboto', sans-serif;
+  --font-thai: var(--font-kanit), var(--font-sarabun), var(--font-prompt), sans-serif;
   --font-mono: 'Menlo', 'Monaco', monospace;
 }
 
@@ -31,6 +32,7 @@
 
 html {
   scroll-behavior: smooth;
+  font-feature-settings: "liga" 1, "calt" 1;
 }
 
 body {
@@ -39,6 +41,18 @@ body {
   font-family: 'Kanit', 'Roboto', 'Helvetica', 'Arial', sans-serif;
   line-height: 1.6;
   font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Thai text optimization */
+.thai-text, 
+[lang="th"], 
+.MuiTypography-root {
+  font-family: 'Kanit', 'Sarabun', 'Prompt', 'Mitr', sans-serif !important;
+  font-feature-settings: "liga" 1, "kern" 1;
+  text-rendering: optimizeLegibility;
 }
 
 /* Custom scrollbar */
@@ -113,6 +127,44 @@ body {
 
 .status-cancelled {
   background-color: #f44336;
+}
+
+/* Typography utilities */
+.text-kanit {
+  font-family: var(--font-kanit), sans-serif !important;
+}
+
+.text-sarabun {
+  font-family: var(--font-sarabun), sans-serif !important;
+}
+
+.text-prompt {
+  font-family: var(--font-prompt), sans-serif !important;
+}
+
+.text-thai {
+  font-family: var(--font-thai) !important;
+  font-feature-settings: "liga" 1, "kern" 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* Enhanced Thai text rendering */
+.thai-heading {
+  font-family: var(--font-kanit), sans-serif !important;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.thai-body {
+  font-family: var(--font-kanit), sans-serif !important;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.thai-button {
+  font-family: var(--font-kanit), sans-serif !important;
+  font-weight: 500;
+  text-transform: none;
 }
 
 /* Print styles */

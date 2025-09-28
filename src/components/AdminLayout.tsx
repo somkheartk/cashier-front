@@ -134,9 +134,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "POS System
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const handleUserMenuClose = () => setAnchorEl(null);
   
-  const handleLogout = () => {
+  const handleLogout = async () => {
     handleUserMenuClose();
-    logout();
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Force redirect to login if logout fails
+      window.location.href = '/login';
+    }
   };
 
   const handleRoleChange = async (newRole: string) => {
@@ -200,13 +206,39 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title = "POS System
         }
       } catch (error) {
         console.error('Error loading menus:', error);
-        // Fallback to default dashboard menu
-        setMenuItems([{
-          text: 'แดชบอร์ด',
-          icon: <DashboardIcon />,
-          href: '/',
-          description: 'ภาพรวมระบบ'
-        }]);
+        // Fallback to default menus
+        setMenuItems([
+          {
+            text: 'แดชบอร์ด',
+            icon: <DashboardIcon />,
+            href: '/',
+            description: 'ภาพรวมระบบ'
+          },
+          {
+            text: 'ขายสินค้า (POS)',
+            icon: <PaymentIcon />,
+            href: '/pos',
+            description: 'ระบบขายหน้าร้าน'
+          },
+          {
+            text: 'รายการสั่งซื้อ',
+            icon: <ShoppingCartIcon />,
+            href: '/orders',
+            description: 'จัดการคำสั่งซื้อ'
+          },
+          {
+            text: 'ลูกค้า',
+            icon: <PeopleIcon />,
+            href: '/customers',
+            description: 'ข้อมูลลูกค้า'
+          },
+          {
+            text: 'รายงาน',
+            icon: <BarChartIcon />,
+            href: '/reports',
+            description: 'รายงานการขาย'
+          }
+        ]);
       }
     };
 

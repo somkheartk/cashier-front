@@ -1,4 +1,4 @@
-import { Kanit } from 'next/font/google';
+import { Kanit, Sarabun, Prompt } from 'next/font/google';
 import ThemeWrapper from '../components/ThemeWrapper';
 import { AuthProvider } from '../contexts/AuthContext';
 import AppWrapper from '../components/AppWrapper';
@@ -7,7 +7,22 @@ import '../styles/globals.css';
 const kanit = Kanit({ 
   subsets: ['latin', 'thai'],
   weight: ['300', '400', '500', '600', '700'],
-  display: 'swap'
+  display: 'swap',
+  variable: '--font-kanit'
+});
+
+const sarabun = Sarabun({
+  subsets: ['latin', 'thai'],
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-sarabun'
+});
+
+const prompt = Prompt({
+  subsets: ['latin', 'thai'],
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-prompt'
 });
 
 export const metadata = {
@@ -22,7 +37,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="th">
-      <body className={kanit.className}>
+      <body className={`${kanit.variable} ${sarabun.variable} ${prompt.variable} ${kanit.className}`}>
         <ThemeWrapper>
           <AuthProvider>
             <AppWrapper>

@@ -22,6 +22,9 @@ export default function AppWrapper({ children }: AppWrapperProps) {
     return null;
   }
 
+  // ตรวจสอบ authentication จากหลายที่
+  const isLoggedIn = user && localStorage.getItem('isLoggedIn') === 'true';
+
   // แสดง loading ขณะตรวจสอบ authentication
   if (isLoading) {
     return (
@@ -44,7 +47,7 @@ export default function AppWrapper({ children }: AppWrapperProps) {
   }
 
   // ถ้าผู้ใช้ล็อกอินแล้ว แสดง AdminLayout
-  if (user) {
+  if (isLoggedIn) {
     return <AdminLayout>{children}</AdminLayout>;
   }
 

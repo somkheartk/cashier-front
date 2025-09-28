@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
 
   // หน้าที่ไม่ต้องล็อกอิน
   const publicPaths = ['/login'];
-  
+
   // ตรวจสอบว่าเป็นหน้าสาธารณะหรือไม่
   const isPublicPath = publicPaths.includes(pathname);
 
