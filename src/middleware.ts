@@ -18,7 +18,8 @@ export function middleware(request: NextRequest) {
   }
 
   // ถ้าไม่ใช่หน้าสาธารณะ และยังไม่ได้ล็อกอิน ให้ redirect ไปหน้า login
-  if (!isPublicPath && !isLoggedIn) {
+  // ใน development mode ให้ bypass authentication
+  if (!isPublicPath && !isLoggedIn && process.env.NODE_ENV !== 'development') {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

@@ -9,7 +9,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Typography
+  Typography,
+  CircularProgress
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -17,6 +18,7 @@ import {
 } from '@mui/icons-material';
 import { OrderStatusCards, OrdersTable, OrderDetailsDialog, NewOrderDialog } from '@/components/orders';
 import { Order, OrderItem } from '@/types';
+import { apiService } from '@/services/api';
 
 // Mock data
 const mockOrders: Order[] = [
@@ -83,11 +85,28 @@ const getStatusText = (status: Order['status']) => {
 };
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [newOrderDialogOpen, setNewOrderDialogOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+
+  // Load orders from API
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        const ordersData = await apiService.getOrders();
+        setOrders(ordersData);
+      } catch (error) {
+        console.error('Failed to load orders:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadOrders();
+  }, []);
 
   const handleViewOrder = (order: Order) => {
     setSelectedOrder(order);
@@ -128,7 +147,13 @@ export default function OrdersPage() {
       </Box>
 
       {/* Status Cards */}
-      <OrderStatusCards statusCounts={statusCounts} />
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <OrderStatusCards statusCounts={statusCounts} />
+      )}
 
       {/* Filters */}
       <Box mb={3} display="flex" gap={2} alignItems="center">
@@ -157,12 +182,18 @@ export default function OrdersPage() {
       </Box>
 
       {/* Orders Table */}
-      <OrdersTable
-        orders={filteredOrders}
-        onViewOrder={handleViewOrder}
-        getStatusColor={getStatusColor}
-        getStatusText={getStatusText}
-      />
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <OrdersTable
+          orders={filteredOrders}
+          onViewOrder={handleViewOrder}
+          getStatusColor={getStatusColor}
+          getStatusText={getStatusText}
+        />
+      )}
 
       {/* View Order Dialog */}
       <OrderDetailsDialog

@@ -79,6 +79,7 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from '@mui/material/styles';
 import { ProductCard, SearchAndFilters, ProductGrid, CartItem, CartSummary } from '../../components/pos';
 import { Product, CartItemData, PaymentMethod, CompletedOrder } from '@/types';
+import { apiService } from '@/services/api';
 
 export default function POSPage() {
   const router = useRouter();
@@ -126,23 +127,8 @@ export default function POSPage() {
   const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
-      // Enhanced mock data with more details
-      const mockProducts: Product[] = [
-        { id: '1', name: 'กาแฟดำร้อน', price: 35, category: 'เครื่องดื่มร้อน', stock: 20, barcode: '1001', description: 'กาแฟดำแท้ 100%' },
-        { id: '2', name: 'กาแฟนมร้อน', price: 45, category: 'เครื่องดื่มร้อน', stock: 15, barcode: '1002', description: 'กาแฟนมสูตรพิเศษ' },
-        { id: '3', name: 'ชาเขียวมัทฉะ', price: 55, category: 'เครื่องดื่มร้อน', stock: 12, barcode: '1003', description: 'ชาเขียวญี่ปุ่นแท้' },
-        { id: '4', name: 'ลาเต้ชาไทย', price: 50, category: 'เครื่องดื่มร้อน', stock: 18, barcode: '1004', description: 'ลาเต้สูตรไทย' },
-        { id: '5', name: 'น้ำส้มสด', price: 40, category: 'เครื่องดื่มเย็น', stock: 25, barcode: '2001', description: 'น้ำส้มสดคั้นใหม่' },
-        { id: '6', name: 'ชานมเย็น', price: 35, category: 'เครื่องดื่มเย็น', stock: 22, barcode: '2002', description: 'ชานมเย็นสูตรเย็น' },
-        { id: '7', name: 'ขนมปังสังขยา', price: 25, category: 'ขนม', stock: 15, barcode: '3001', description: 'ขนมปังสังขยาโฮมเมด' },
-        { id: '8', name: 'ครัวซองต์', price: 30, category: 'ขนม', stock: 12, barcode: '3002', description: 'ครัวซองต์เนยสด' },
-        { id: '9', name: 'เค้กช็อกโกแลต', price: 85, category: 'ขนม', stock: 8, barcode: '3003', description: 'เค้กช็อกโกแลต 3 ชั้น' },
-        { id: '10', name: 'แซนด์วิชไก่', price: 75, category: 'อาหาร', stock: 10, barcode: '4001', description: 'แซนด์วิชไก่ย่าง' },
-        { id: '11', name: 'สลัดผัก', price: 65, category: 'อาหาร', stock: 14, barcode: '4002', description: 'สลัดผักสดรวม' },
-        { id: '12', name: 'โยเกิร์ตกรีก', price: 45, category: 'ของหวาน', stock: 20, barcode: '5001', description: 'โยเกิร์ตกรีกแท้' }
-      ];
-
-      setProducts(mockProducts);
+      const productsData = await apiService.getProducts();
+      setProducts(productsData);
     } catch (error) {
       console.error('Failed to load products:', error);
       setNotification({ open: true, message: 'ไม่สามารถโหลดสินค้าได้', type: 'error' });

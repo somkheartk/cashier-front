@@ -16,15 +16,19 @@ class ApiService {
     if (!response.ok) {
       // Handle 401 Unauthorized - token expired or invalid
       if (response.status === 401) {
-        console.warn('Token expired or invalid, redirecting to login...');
+        console.warn('Token expired or invalid, clearing auth data...');
         // Clear authentication data
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         document.cookie = 'isLoggedIn=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax';
-        // Redirect to login page
-        window.location.href = '/login';
-        throw new Error('Authentication expired. Redirecting to login...');
+        
+        // In development, don't redirect automatically - let user login manually
+        if (process.env.NODE_ENV === 'production') {
+          window.location.href = '/login';
+        }
+        
+        throw new Error('Authentication expired. Please login again.');
       }
 
       const error = await response.text();

@@ -4,47 +4,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
-  Button
+  Button,
+  CircularProgress
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { CustomerStatsCards, CustomersTable, CustomerFormDialog } from '@/components/customers';
-import { Customer } from '@/types';
-
-// Mock data
-const mockCustomers: Customer[] = [
-  {
-    id: 1,
-    name: 'สมชาย ใจดี',
-    email: 'somchai@email.com',
-    phone: '081-234-5678',
-    membershipLevel: 'gold',
-    totalOrders: 45,
-    totalSpent: 125000,
-    lastOrderDate: '2024-01-15',
-    avatar: 'https://i.pravatar.cc/150?img=1'
-  },
-  {
-    id: 2,
-    name: 'สมหญิง รักสวย',
-    email: 'somying@email.com',
-    phone: '082-345-6789',
-    membershipLevel: 'silver',
-    totalOrders: 28,
-    totalSpent: 75000,
-    lastOrderDate: '2024-01-14',
-    avatar: 'https://i.pravatar.cc/150?img=2'
-  },
-  {
-    id: 3,
-    name: 'นายสมศักดิ์ มีเงิน',
-    email: 'somsak@email.com',
-    phone: '083-456-7890',
-    membershipLevel: 'bronze',
-    totalOrders: 12,
-    totalSpent: 25000,
-    lastOrderDate: '2024-01-13'
-  }
-];
+import { Customer, CustomerFormData } from '@/types';
+import { apiService } from '@/services/api';
 
 const getMembershipColor = (level: Customer['membershipLevel']) => {
   switch (level) {
@@ -65,10 +31,27 @@ const getMembershipText = (level: Customer['membershipLevel']) => {
 };
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [formData, setFormData] = useState({
+
+  // Load customers from API
+  useEffect(() => {
+    const loadCustomers = async () => {
+      try {
+        const customersData = await apiService.getCustomers();
+        setCustomers(customersData);
+      } catch (error) {
+        console.error('Failed to load customers:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCustomers();
+  }, []);
+  const [customerFormData, setCustomerFormData] = useState<CustomerFormData>({
     name: '',
     email: '',
     phone: '',
@@ -86,7 +69,7 @@ export default function CustomersPage() {
 
   const handleAddCustomer = () => {
     setSelectedCustomer(null);
-    setFormData({
+    setCustomerFormData({
       name: '',
       email: '',
       phone: '',
@@ -97,7 +80,7 @@ export default function CustomersPage() {
 
   const handleEditCustomer = (customer: Customer) => {
     setSelectedCustomer(customer);
-    setFormData({
+    setCustomerFormData({
       name: customer.name,
       email: customer.email,
       phone: customer.phone,
@@ -111,14 +94,14 @@ export default function CustomersPage() {
       // Edit existing customer
       setCustomers(customers.map(c =>
         c.id === selectedCustomer.id
-          ? { ...c, ...formData }
+          ? { ...c, ...customerFormData }
           : c
       ));
     } else {
       // Add new customer
       const newCustomer: Customer = {
         id: Date.now(),
-        ...formData,
+        ...customerFormData,
         totalOrders: 0,
         totalSpent: 0,
         lastOrderDate: new Date().toISOString().split('T')[0]
@@ -160,26 +143,38 @@ export default function CustomersPage() {
       </Box>
 
       {/* Statistics Cards */}
-      <CustomerStatsCards stats={stats} formatCurrency={formatCurrency} />
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <CustomerStatsCards stats={stats} formatCurrency={formatCurrency} />
+      )}
 
       {/* Customers Table */}
-      <CustomersTable
-        customers={customers}
-        onEditCustomer={handleEditCustomer}
-        onDeleteCustomer={handleDeleteCustomer}
-        getMembershipColor={getMembershipColor}
-        getMembershipText={getMembershipText}
-        formatCurrency={formatCurrency}
-        formatDate={formatDate}
-      />
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <CustomersTable
+          customers={customers}
+          onEditCustomer={handleEditCustomer}
+          onDeleteCustomer={handleDeleteCustomer}
+          getMembershipColor={getMembershipColor}
+          getMembershipText={getMembershipText}
+          formatCurrency={formatCurrency}
+          formatDate={formatDate}
+        />
+      )}
 
       {/* Add/Edit Customer Dialog */}
       <CustomerFormDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         customer={selectedCustomer}
-        formData={formData}
-        onFormDataChange={setFormData}
+        formData={customerFormData}
+        onFormDataChange={setCustomerFormData}
         onSave={handleSaveCustomer}
         formatCurrency={formatCurrency}
         formatDate={formatDate}
